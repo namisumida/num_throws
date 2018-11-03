@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Number of Throws</title>
+		<script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+		<style type="text/css">
+
+			#input{
+				position: absolute;
+				top: 40px;
+				left: 800px;
+				width: 100px;
+			}
+
+		</style>
+	</head>
+	<body>
+
+		<select id="input">
+				<option value="all" selected="selected">All games</option>
+				<option value="2016">2016 games</option>
+				<option value="2017">2017 games</option>
+		</select>
+
+		<script type="text/javascript">
+
+		// Width and height
+		var margin = {top: 20, bottom: 20, right: 20, left: 20};
+		var w = 900;
+		var h = {svg: 450, head: 25 };
+		var h_mens = (h.svg-h.head-margin.top-margin.bottom)/3/2 + h.head+margin.top;
+		var h_mixed = ((h.svg-h.head-margin.top-margin.bottom*2)/3*(1.5)) + h.head+margin.top;
+		var h_womens = ((h.svg-h.head-margin.top-margin.bottom*2)/3*2.5) + h.head+margin.top;
+		var w_label = 80; //width of MENS WOMENS MIXED label area
+		var label_size = 12;
+
+		var radius = 8; // radius of all circles
+		var dataset, averages, xScale;
+
+		// convert data types for some columns
+		var rowConverter = function(d) {
+			return {
+				game_id: parseInt(d.game_id),
+				division: d.division,
+				throws: parseInt(d.throws),
+				win_team: d.win_team,
+				lose_team: d.lose_team,
+				score: d.score,
+				tournament: d.tournament,
+				game_type: d.game_type,
+				year: parseInt(d.year)
+			};
+		};
+
+		// Convert team name ID's to strings that can be displayed
+		var teamNames = [{team_id: "bos_ironside", name: "Ironside"}, {team_id: "den_johnnybravo", name: "Johnny Bravo"},
+										{team_id: "sf_revolver", name: "Revolver"}, {team_id: "aus_doublewide", name: "Doublewide"},
+										{team_id: "ral_ringoffire", name: "Ring of Fire"}, {team_id: "dc_truckstop", name: "Truck Stop"},
+										{team_id: "chi_machine", name: "Machine"}, {team_id: "sea_sockeye", name: "Sockeye"},
+										{team_id: "sea_mixtape", name: "Mixtape"}, {team_id: "phi_amp", name: "AMP"},
+										{team_id: "bos_slowwhite", name: "Slow White"}, {team_id: "sea_bfg", name: "BFG"},
+										{team_id: "sf_blackbird", name: "Blackbird"}, {team_id: "min_dragnthrust", name: "Drag'n Thrust"},
+										{team_id: "ct_metronorth", name: "Metro North"}, {team_id: "sf_mischief", name: "Mischief"},
+										{team_id: "sf_fury", name: "Fury"}, {team_id: "bos_brutesquad", name: "Brute Squad"},
+										{team_id: "den_mollybrown", name: "Molly Brown"}, {team_id: "atl_ozone", name: "Ozone"},
+										{team_id: "sea_riot", name: "Riot"}, {team_id: "col_revolution", name: "Revolution"}];
+		var team_ids = teamNames.map(a => a.team_id);
+		var teamName_convert = function(team_id) {
+			var index = team_ids.indexOf(team_id);
+			return teamNames[index].name;
+		};
+
+		// Import data and run everything on this data
+		d3.csv("numThrows.csv", rowConverter, function(data) {
+
+			// Copy data into global dataset
+			dataset = data;
+
+			// Create averages dataset (for additional circles and labels)
+			averages = dataset.filter(function(d) {
+				return d.game_id==0;
+			})
+
+			// Create convenient mins and maxes
+			var min = {all: d3.min(dataset, function(d) { return d.throws; }),
+									mens: d3.min(dataset, function(d) {
+										if (d.division=="mens") {
+											return d.throws;
+										}}),
+									womens: d3.min(dataset, function(d) {
+										if (d.division=="womens") {
+											return d.throws;
+										}}),
+									mixed: d3.min(dataset, function(d) {
+										if (d.division=="mixed") {
+											return d.throws;
+										}})
+									};
+			var min_list = [min.mens, min.womens, min.mixed];
+			var max = {all: d3.max(dataset, function(d) { return d.throws; }),
+								 mens: d3.max(dataset, function(d) {
+										if (d.division=="mens") {
+											return d.throws;
+										}}),
+								 womens: d3.max(dataset, function(d) {
+										if (d.division=="womens") {
+											return d.throws;
+										}}),
+								 mixed: d3.max(dataset, function(d) {
+										if (d.division=="mixed") {
+											return d.throws;
+										}})
+									};
+			var max_list = [max.mens, max.womens, max.mixed];
+
+			// Create scale function
+			var xScale = d3.scaleLinear()
+								 .domain([min.all, max.all])
+								 .range([margin.left+w_label, w-margin.right]);
+
+			// Create an SVG
+			var svg = d3.select("body")
+						.append("svg")
+						.attr("width", w)
+						.attr("height", h.svg);
+
+			// Create a title in the header section
+			svg.append("text")
+				 .attr("id", "title")
+				 .attr("x", margin.left)
+				 .attr("y", margin.top)
+				 .text("Number of throws per game")
+				 .attr("font-size", 25)
+				 .attr("font-weight", "bold")
+				 .attr("font-family", "sans-serif");
+
+			// Add a line
+			svg.append("line")
+				 .style("stroke", "black")
+				 .attr("x1", margin.left)
+				 .attr("y1", margin.top+5) // midway between header and subheader
+				 .attr("x2", w)
+				 .attr("y2", margin.top+5);
+
+			// Create a subheader
+			svg.append("text")
+				 .attr("id", "subtitle")
+				 .attr("x", margin.left)
+				 .attr("y", margin.top+23)
+				 .text("Number of throws attempted in each game and on average across each division's games")
+				 .attr("font-size", 12)
+				 .attr("font-family", "sans-serif");
+
+			// Create labels for Men's, Mixed, Women's on left side
+			var labels = svg.append("g"); // Create a group
+
+			labels.append("text")
+				 .attr("x", margin.left)
+				 .attr("y", h_mens+5)
+				 .text("MEN'S");
+
+			labels.append("text")
+				 .attr("x", margin.left)
+				 .attr("y", h_mixed+5)
+				 .text("MIXED");
+
+			labels.append("text")
+				 .attr("x", margin.left)
+				 .attr("y", h_womens+5)
+				 .text("WOMEN'S");
+
+			labels.attr("font-size", "15") // edit look of all three at once
+						.attr("font-weight", "bold")
+						.attr("fill", "black")
+						.attr("font-family", "sans-serif")
+						.attr("text-anchor", "start");
+
+			// Create lines for MEN'S, MIXED, WOMEN'S
+			var lines = svg.append("g");
+			lines.style("stroke", "black")
+					 .attr("opacity", 0.7); //styles that affect all lines
+
+			// Men's line
+			lines.append("line")
+					 .attr("id", "mens_line")
+					 .attr("x1", xScale(min.mens))
+			 		 .attr("x2", xScale(max.mens))
+					 .attr("y1", h_mens)
+					 .attr("y2", h_mens);
+
+			// Mixed line
+ 			lines.append("line")
+					 .attr("id", "mixed_line")
+					 .attr("x1", xScale(min.mixed))
+			 		 .attr("x2", xScale(max.mixed))
+					 .attr("y1", h_mixed)
+ 					 .attr("y2", h_mixed);
+
+			 // Women's line
+			 lines.append("line")
+			 		 .attr("id", "womens_line")
+					 .attr("x1", xScale(min.womens))
+			 		 .attr("x2", xScale(max.womens))
+					 .attr("y1", h_womens)
+			 		 .attr("y2", h_womens);
+
+			 // Add data labels
+			 var data_labels = svg.selectAll("data_labels")
+			 	 .data(dataset)
+			 	 .enter()
+			 	 .append("text")
+			 	 .text(function(d) {
+					 if ((d.division=="mens" & (d.throws==min.mens | d.throws==max.mens | d.game_id==0)) | // if it's min, max, or average
+			 				 (d.division=="mixed" & (d.throws==min.mixed | d.throws==max.mixed | d.game_id==0)) |
+			 				 (d.division=="womens" & (d.throws==min.womens | d.throws==max.womens | d.game_id==0))) {
+			 			 return d.throws;
+			 		 }
+			 	 })
+			 	 .attr("x", function(d) {
+			 		 return xScale(d.throws)
+			 	 })
+			 	 .attr("y", function(d) {
+			 		 if (d.division=="mens") {
+			 			 return h_mens+30;
+			 		 }
+			 		 else if (d.division=="mixed") {
+			 			 return h_mixed+30;
+			 		 }
+			 		 else {
+			 			 return h_womens+30;
+			 		 }
+			 	 })
+			 	 .attr("font-family", "sans-serif")
+			 	 .attr("font-size", label_size)
+				 .attr("fill", function(d) {
+					 if (d.game_id==0 &(d.year==2016 | d.year==2017)) {
+							 return "none";
+					 }
+					 else { return "black"; }
+				 })
+			 	 .attr("text-anchor", "middle");
+
+			// Add "Average" labels
+			var avg_labels = svg.selectAll("avg_labels")
+													.data(averages)
+													.enter()
+													.filter(function(d) {
+														return d.division=="mens";
+													})
+													.append("text")
+													.text("Average")
+													.attr("x", function(d) {
+														return xScale(d.throws);
+													})
+													.attr("y", h_mens-20)
+													.attr("font-family", "sans-serif")
+								 			 	  .attr("font-size", label_size)
+								 			 	  .attr("fill", function(d) {
+														if (d.year==2017 | d.year==2016) {
+															return "none";
+														}
+														else { return "black"; }
+													})
+								 			 	  .attr("text-anchor", "middle")
+													.attr("font-weight", "bold")
+
+			// Outer circles for averages
+			var avg_circles = svg.selectAll("avg_circles")
+				 .data(averages)
+				 .enter()
+				 .append("circle")
+				 .attr("cx", function(d) {
+						return xScale(d.throws);
+				 })
+				 .attr("cy", function(d) {
+ 					 	if (d.division=="mens") {
+ 						 	return h_mens;
+ 					 	}
+ 					 	else if (d.division=="mixed") {
+ 						 	return h_mixed;
+ 					 	}
+ 					 	else {
+ 						 	return h_womens;
+ 					 	}
+ 				 })
+				 .attr("r", radius*1.5)
+				 .attr("fill", "none")
+				 .attr("stroke", function(d) {
+					 if (d.year==2017 | d.year==2016) { // do not show the 2016 and 2017 ones
+						 return "none";
+					 }
+					 else { return "black"; }
+				 });
+
+			// Initially create all circles
+			var main_circles = svg.selectAll("main_circles")
+				 .data(dataset)
+				 .enter()
+				 .append("circle")
+
+			// Define things that all circles will have
+			main_circles.attr("cx", function(d) {
+								return xScale(d.throws)
+							})
+							.attr("cy", function(d) {
+		 					 	if (d.division=="mens") {
+		 						 	return h_mens;
+		 					 	}
+		 					 	else if (d.division=="mixed") {
+		 						 	return h_mixed;
+		 					 	}
+		 					 	else {
+		 						 	return h_womens;
+		 					 	}
+		 				 	})
+							.attr("r", radius)
+							.attr("fill", function(d) {
+								if (d.game_id==0 & (d.year==2017 | d.year==2016)) { // do not show the 2016 and 2017 ones
+									return "none";
+								}
+								else { return "black"; }
+							})
+							.attr("opacity", 0.6);
+
+			// Hover for non-average circles
+			main_circles.filter(function(d) { return d.game_id>0 }) // filter to non-average circles
+						 .on("mouseover", function(d) { // on mouseover, see details
+								d3.select(this).attr("opacity", 1)
+
+			 					var xPosition = parseFloat(d3.select(this).attr("cx"));
+			 					var yPosition = parseFloat(d3.select(this).attr("cy"));
+
+								// Create a tooltip - info about game
+								svg.append("text")
+										.attr("id", "tooltip1")
+										.attr("x", xPosition)
+										.attr("y", yPosition+48)
+										.attr("text-anchor", function() {
+											if (xPosition < (w - margin.right - 100)) { // if not near the right margin
+												if (xPosition < (margin.left + w_label) + 100) { // if near the left margin...
+													return "start";
+												}
+												else { return "middle"; } // else it's somewhere in the middle of the graphic
+											}
+											else if (xPosition >= (w - margin.right - 100)) { // near the right margin
+												return "end";
+											}
+										})
+										.attr("font-family", "sans-serif")
+										.attr("font-size", label_size)
+										.attr("font-weight", "bold")
+										.attr("fill", "black")
+										.text(d.year + " " + d.tournament + " " + d.game_type);
+								svg.append("text")
+										.attr("id", "tooltip2")
+										.attr("x", xPosition)
+										.attr("y", yPosition+60)
+										.attr("text-anchor", function() {
+											if (xPosition < (w - margin.right - 100)) { // if not near the right margin
+												if (xPosition < (margin.left + w_label) + 100) { // if near the left margin...
+													return "start";
+												}
+												else { return "middle"; } // else it's somewhere in the middle of the graphic
+											}
+											else if (xPosition >= (w - margin.right - 100)) { // near the right margin
+												return "end";
+											}
+										})
+										.attr("font-family", "sans-serif")
+										.attr("font-size", label_size)
+										.attr("font-weight", "bold")
+										.attr("fill", "black")
+										.text(teamName_convert(d.win_team) + " (" + d.score.split("-")[0] + ") vs. " + teamName_convert(d.lose_team) + " (" + d.score.split("-")[1] + ")");
+
+								// other data labels on that line disappear
+								svg.append("rect")
+									 .attr("id", "label_background")
+									 .attr("x", w_label+margin.left-10)
+									 .attr("y", yPosition+15)
+									 .attr("width", w-(w_label+margin.left-10))
+									 .attr("height", 20)
+									 .attr("fill", "white");
+
+								// add temp data label
+								svg.append("text")
+									 .text(d.throws)
+									 .attr("id", "temp_datalabels")
+									 .attr("x", xPosition)
+									 .attr("y", yPosition+30)
+									 .attr("font-family", "sans-serif")
+									 .attr("font-size", label_size)
+									 .attr("fill", "black")
+									 .attr("text-anchor", "middle")
+									 .attr("font-weight", "bold");
+
+							})
+							.on("mouseout", function() {
+									d3.select("#tooltip1").remove();
+									d3.select("#tooltip2").remove();
+									d3.select("#temp_datalabels").remove();
+									d3.select("#label_background").remove();
+								 	d3.select(this)
+								 		.attr("fill", "black")
+										.attr("opacity", 0.6);
+							});
+					
+
+			// INTERACTIVITY
+			// Filtering options
+			d3.select("#input")
+				.on("change", function() {
+
+					// Create selection and other selection
+					var selection = d3.select(this).node().value;
+
+					// circle colors on default
+					main_circles.attr("fill", "black")
+											.on("mouseout", function() {
+													d3.select("#tooltip1").remove();
+													d3.select("#tooltip2").remove();
+													d3.select("#temp_datalabels").remove();
+													d3.select("#label_background").remove();
+													d3.select(this)
+														.attr("fill", "black")
+														.attr("opacity", 0.6)
+											 });
+
+					if (selection==2016 | selection==2017) {
+						// determine the "other" selection reference
+						var other_selection = 0;
+						if (selection==2016) { other_selection = 2017; }
+						else { other_selection = 2016; };
+
+						// Set fill color
+						var fill = "";
+						if (selection==2016) { fill = "green"; }
+						else { fill = "purple"; };
+
+						// Calculate min/max specific for the year
+						var sub_dataset = dataset.filter(function(d) {
+																return d.year==selection;
+															});
+						min_sub = {all: d3.min(sub_dataset, function(d) { return d.throws; }),
+									 mens: d3.min(sub_dataset, function(d) {
+													if (d.division=="mens") {
+														return d.throws;
+													}}),
+									 womens: d3.min(sub_dataset, function(d) {
+													if (d.division=="womens") {
+														return d.throws;
+													}}),
+									 mixed: d3.min(sub_dataset, function(d) {
+													if (d.division=="mixed") {
+														return d.throws;
+													}})
+									};
+
+						max_sub = {all: d3.max(sub_dataset, function(d) { return d.throws; }),
+									 mens: d3.max(sub_dataset, function(d) {
+													if (d.division=="mens") {
+														return d.throws;
+													}}),
+									 womens: d3.max(sub_dataset, function(d) {
+													if (d.division=="womens") {
+														return d.throws;
+													}}),
+									 mixed: d3.max(sub_dataset, function(d) {
+													if (d.division=="mixed") {
+														return d.throws;
+													}})
+									};
+
+						// Change color of existing circles
+				    main_circles.attr("fill", function(d) {
+				        if (d.year==selection) {
+				          return fill;
+				        }
+				        else if (d.game_id==0 & d.year==other_selection) {
+				          return "none";
+				        }
+				        else { return "blank"; }
+				      })
+				      .attr("opacity", 0.6);
+				    main_circles.on("mouseout", function(d) {
+				      d3.select("#tooltip1").remove();
+				      d3.select("#tooltip2").remove();
+				      d3.select("#temp_datalabels").remove();
+				      d3.select("#label_background").remove();
+				      d3.select(this).attr("fill", function() {
+				                        if (d.year==selection) {
+				                          return fill;
+				                        }
+				                        else {
+				                          return "black";
+				                        }
+				                      })
+				                      .attr("opacity", function() {
+				                        if (d.year==selection) {
+				                          return 0.7;
+				                        }
+				                        else { return 0.7; }
+				                      });
+				    });
+
+				    // Average circles appear
+				    avg_circles.attr("stroke", function(d) {
+				                  if (d.year==selection) {
+				                    return fill;
+				                  }
+				                  else if (d.year==other_selection) {
+				                    return "none";
+				                  }
+				                  else { return "black"; }
+				                });
+
+				    // Average text
+				    avg_labels.attr("fill", function(d) {
+				                  if (d.year==selection) {
+				                    return fill;
+				                  }
+				                  else { return "none"; }
+				                })
+				                .text(selection + " Average");
+
+						// Data labels
+						data_labels.text(function(d) {
+	 					 if ((d.division=="mens" & (d.throws==min_sub.mens | d.throws==max_sub.mens | d.game_id==0)) | // if it's min, max, or average
+	 			 				 (d.division=="mixed" & (d.throws==min_sub.mixed | d.throws==max_sub.mixed | d.game_id==0)) |
+	 			 				 (d.division=="womens" & (d.throws==min_sub.womens | d.throws==max_sub.womens | d.game_id==0))) {
+	 			 			 return d.throws;
+	 			 		 }
+	 			 	 })
+					 .attr("fill", function(d) {
+						 if (d.year==selection) {
+							 return fill;
+						 }
+						 else { return "none";}
+					 });
+				 }
+
+					else { // This is when "all" is selected
+						// Don't show the small circles for the 2016 and 2017 averages
+				    main_circles.attr("opacity", 0.6)
+				                .attr("fill", function(d) {
+				                  if (d.game_id==0) {
+				                    if (d.year==2016 | d.year==2017) {
+				                      return "none";
+				                    }
+				                  }
+				                });
+				    // Don't show the outer average circle
+				    avg_circles.attr("stroke", function(d) {
+				      if (d.year==2017 | d.year==2016) {
+				        return "none";
+				      }
+				      else { return "black"; }
+				    });
+
+				    // Average text
+				    avg_labels.attr("fill", function(d) {
+				                  if (d.year==2016 | d.year==2017) {
+				                    return "none";
+				                  }
+				                  else { return "black"; }
+				                })
+				                .text("Average");
+
+				    // Data labels return to normal
+				    data_labels.attr("fill", function(d) {
+				                  if (d.game_id==0 &(d.year==2016 | d.year==2017)) {
+				                     return "none";
+				                  }
+				                  else { return "black"; }
+				                })
+												.text(function(d) {
+													if ((d.division=="mens" & (d.throws==min.mens | d.throws==max.mens | d.game_id==0)) | // if it's min, max, or average
+															(d.division=="mixed" & (d.throws==min.mixed | d.throws==max.mixed | d.game_id==0)) |
+															(d.division=="womens" & (d.throws==min.womens | d.throws==max.womens | d.game_id==0))) {
+														return d.throws;
+													}
+												});
+
+					};
+
+			});
+		});
+
+    </script>
+	</body>
+</html>
