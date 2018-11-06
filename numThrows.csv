@@ -26,9 +26,12 @@ game_id,division,throws,win_team,lose_team,score,tournament,game_type,year
 17,womens,514,sea_riot,sf_fury,15-14,Nationals,semi-final,2016
 18,womens,382,bos_brutesquad,den_mollybrown,14-9,Nationals,semi-final,2016
 28,womens,381,bos_brutesquad,sea_riot,14-7,US Open,final,2016
-0,mens,307,,,,,,
-0,mixed,335,,,,,,
-0,womens,371,,,,,,
+32,mens,337,ny_pony,sf_revolver,15-7,Nationals,final,2018
+31,womens,450,sf_fury,bos_brutesquad,14-13,Nationals,final,2018
+33,mixed,298,phi_amp,sea_mixtape,15-8,Nationals,final,2018
+0,mens,310,,,,,,99
+0,mixed,331,,,,,,99
+0,womens,379,,,,,,99
 0,mens,311,,,,,,2017
 0,mixed,346,,,,,,2017
 0,womens,331,,,,,,2017
