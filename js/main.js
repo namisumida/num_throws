@@ -181,7 +181,7 @@ d3.csv("numThrows.csv", rowConverter, function(data) {
      .attr("id", "title")
      .attr("x", margin.left)
      .attr("y", margin.top)
-     .text("Number of throws per game")
+     .text("Number of throws in an ultimate frisbee game")
      .style("font-size", 25)
      .style("font-weight", "bold")
      .style("font-family", "sans-serif");
