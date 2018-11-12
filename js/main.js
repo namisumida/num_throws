@@ -7,10 +7,10 @@ var h_mixed = ((h.svg-h.head-margin.top-margin.bottom*2)/3*(1.5)) + h.head+margi
 var h_womens = ((h.svg-h.head-margin.top-margin.bottom*2)/3*2.5) + h.head+margin.top;
 var w_label = 80; //width of MENS WOMENS MIXED label area
 
-var default_color = d3.rgb(56,118,104);
-var color1 = d3.rgb(170,62,71);
-var color2 = d3.rgb(148,157,71);
-var color3 = d3.rgb(234,158,43);
+var default_color = teal;
+var color1 = maroon;
+var color2 = lime;
+var color3 = orange;
 
 var radius = 8; // radius of all circles
 var dataset, averages, xScale;
@@ -30,58 +30,7 @@ var rowConverter = function(d) {
   };
 };
 
-// Convert team name ID's to strings that can be displayed
-var teamNames = [{team_id: "bos_ironside", name: "Ironside"}, {team_id: "den_johnnybravo", name: "Johnny Bravo"},
-                {team_id: "sf_revolver", name: "Revolver"}, {team_id: "aus_doublewide", name: "Doublewide"},
-                {team_id: "ral_ringoffire", name: "Ring of Fire"}, {team_id: "dc_truckstop", name: "Truck Stop"},
-                {team_id: "chi_machine", name: "Machine"}, {team_id: "sea_sockeye", name: "Sockeye"},
-                {team_id: "ny_pony", name: "PoNY"},
-                {team_id: "sea_mixtape", name: "Mixtape"}, {team_id: "phi_amp", name: "AMP"},
-                {team_id: "bos_slowwhite", name: "Slow White"}, {team_id: "sea_bfg", name: "BFG"},
-                {team_id: "sf_blackbird", name: "Blackbird"}, {team_id: "min_dragnthrust", name: "Drag'n Thrust"},
-                {team_id: "ct_metronorth", name: "Metro North"}, {team_id: "sf_mischief", name: "Mischief"},
-                {team_id: "sf_fury", name: "Fury"}, {team_id: "bos_brutesquad", name: "Brute Squad"},
-                {team_id: "den_mollybrown", name: "Molly Brown"}, {team_id: "atl_ozone", name: "Ozone"},
-                {team_id: "sea_riot", name: "Riot"}, {team_id: "col_revolution", name: "Revolution"}];
 var team_ids = teamNames.map(a => a.team_id);
-var teamName_convert = function(team_id) {
-  var index = team_ids.indexOf(team_id);
-  return teamNames[index].name;
-};
-
-// text wrapping function
-function wrap(text, width) {
-  text.each(function () {
-    var text = d3.select(this),
-        words = text.text().split(/\s+/).reverse(),
-        word,
-        line = [],
-        lineNumber = 0,
-        lineHeight = 1.3, // ems
-        x = text.attr("x"),
-        y = text.attr("y"),
-        dy = 0, //parseFloat(text.attr("dy")),
-        tspan = text.text(null)
-                    .append("tspan")
-                    .attr("x", x)
-                    .attr("y", y)
-                    .attr("dy", dy + "em");
-    while (word = words.pop()) {
-        line.push(word);
-        tspan.text(line.join(" "));
-        if (tspan.node().getComputedTextLength() > width) {
-            line.pop();
-            tspan.text(line.join(" "));
-            line = [word];
-            tspan = text.append("tspan")
-                        .attr("x", x)
-                        .attr("y", y)
-                        .attr("dy", ++lineNumber * lineHeight + dy + "em")
-                        .text(word);
-        }
-    }
-  });
-}; // end wrap function
 
 // finding min and max
 var min_sub, max_sub;
@@ -181,7 +130,7 @@ d3.csv("numThrows.csv", rowConverter, function(data) {
      .attr("id", "title")
      .attr("x", margin.left)
      .attr("y", margin.top)
-     .text("Number of throws in an ultimate frisbee game")
+     .text("Number of throws per game")
      .style("font-size", 25)
      .style("font-weight", "bold")
      .style("font-family", "sans-serif");
