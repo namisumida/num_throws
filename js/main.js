@@ -9,7 +9,7 @@ var w_label = 80; //width of MENS WOMENS MIXED label area
 
 var default_color = teal;
 var color1 = maroon;
-var color2 = lime;
+var color2 = dark_blue;
 var color3 = orange;
 
 var radius = 8; // radius of all circles
