@@ -30,8 +30,6 @@ var rowConverter = function(d) {
   };
 };
 
-var team_ids = teamNames.map(a => a.team_id);
-
 // finding min and max
 var min_sub, max_sub;
 function find_minsub(sub_dataset) {
