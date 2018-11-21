@@ -7,10 +7,10 @@ var h_mixed = ((h.svg-h.head-margin.top-margin.bottom*2)/3*(1.5)) + h.head+margi
 var h_womens = ((h.svg-h.head-margin.top-margin.bottom*2)/3*2.5) + h.head+margin.top;
 var w_label = 80; //width of MENS WOMENS MIXED label area
 
-var default_color = teal;
-var color1 = maroon;
-var color2 = dark_blue;
-var color3 = orange;
+var default_color = light_demblue;
+var color1 = light_repred;
+var color2 = light_green;
+var color3 = dark_purple;
 
 var radius = 8; // radius of all circles
 var dataset, averages, xScale;
