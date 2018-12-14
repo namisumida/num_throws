@@ -1,11 +1,11 @@
 // Width and height
-var margin = {top: 20, bottom: 20, right: 20, left: 20};
+var margin = {top: 20, bottom: 20, right: 20, left: 5};
 var w = 950;
 var h = {svg: 450, head: 25 };
 var h_mens = (h.svg-h.head-margin.top-margin.bottom)/3/2 + h.head+margin.top;
 var h_mixed = ((h.svg-h.head-margin.top-margin.bottom*2)/3*(1.5)) + h.head+margin.top;
 var h_womens = ((h.svg-h.head-margin.top-margin.bottom*2)/3*2.5) + h.head+margin.top;
-var w_label = 80; //width of MENS WOMENS MIXED label area
+var w_label = 90; //width of MENS WOMENS MIXED label area
 
 var default_color = d3.rgb(255,122,115);
 var color1 = d3.rgb(160,223,167);
