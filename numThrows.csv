@@ -21,7 +21,7 @@ game_id,division,throws,win_team,lose_team,score,tournament,game_type,year
 22,mixed,360,bos_slowwhite,ct_metronorth,15-11,Nationals,final,2016
 23,mixed,297,bos_slowwhite,min_dragnthrust,15-9,Nationals,semi-final,2016
 24,mixed,345,ct_metronorth,sf_mischief,14-11,Nationals,semi-final,2016
-30,mixed,278,bos_slowwhite,sea_mixtape,15-10,US Open,final,2016
+30,mixed,278,min_dragnthrust,sea_mixtape,15-14,US Open,final,2016
 16,womens,411,bos_brutesquad,sea_riot,12-11,Nationals,final,2016
 17,womens,514,sea_riot,sf_fury,15-14,Nationals,semi-final,2016
 18,womens,382,bos_brutesquad,den_mollybrown,14-9,Nationals,semi-final,2016
